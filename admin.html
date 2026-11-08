@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-slate-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SalvaPlato - Portal de Administración & Restaurantes</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Animación del láser escáner */
+    @keyframes scanBeam {
+      0% { top: 6%; opacity: 0.8; }
+      50% { top: 90%; opacity: 1; }
+      100% { top: 6%; opacity: 0.8; }
+    }
+    .scanner-laser {
+      animation: scanBeam 2.2s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-start min-h-screen bg-slate-950 p-0 sm:p-4">
+
+  <!-- ============================================================== -->
+  <!-- 1. PANTALLA INICIAL: INGRESO DE RESTAURANTES ALIADOS           -->
+  <!-- ============================================================== -->
+  <div id="admin-auth-screen" class="w-full max-w-md min-h-screen flex flex-col justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 shadow-2xl space-y-5 modal-animate-in">
+      
+      <!-- Logo y bienvenida empresarial -->
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 bg-gradient-to-tr from-amber-500 to-orange-400 text-white rounded-2xl flex items-center justify-center font-black text-2xl mx-auto shadow-lg shadow-amber-500/30">
+          🏪
+        </div>
+        <h2 class="text-xl font-black text-slate-900 mt-2">Portal Restaurantes Aliados</h2>
+        <p class="text-xs text-slate-500">Escáner QR de comensales, publicación en 10s y calculadora ROI</p>
+      </div>
+
+      <!-- Formulario Login de Restaurante -->
+      <form id="form-merchant-login" class="space-y-3.5 text-xs">
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">Selecciona tu Restaurante / Sucursal:</label>
+          <select id="login-merchant-select" class="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl p-3 text-xs font-bold focus:ring-2 focus:ring-emerald-500">
+          </select>
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">Nombre del Administrador o Cajero de Turno:</label>
+          <input id="login-manager-name" type="text" value="Carlos Rincón (Gerente de Turno)" placeholder="Ej. Carlos Rincón" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">PIN de Seguridad del Punto:</label>
+          <input type="password" value="1234" placeholder="••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-black text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-1">
+          <span>Abrir Panel de Operaciones</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-400"></i>
+        </button>
+
+        <!-- Acceso Rápido Demo -->
+        <button type="button" onclick="AdminApp.loginDemo()" class="w-full py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold rounded-xl transition flex items-center justify-center gap-1.5 text-xs">
+          <span>⚡ Entrar como Administrador Demo (1 Clic)</span>
+        </button>
+      </form>
+
+      <div class="pt-2 text-center border-t border-slate-100">
+        <a href="cliente.html" class="text-xs text-slate-500 hover:text-emerald-600 font-bold">
+          ¿Eres comensal? Ir a la aplicación de Clientes
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. PANEL PRINCIPAL DE ADMINISTRADOR (DESPUÉS DEL LOGIN)       -->
+  <!-- ============================================================== -->
+  <div id="admin-main-app" class="hidden w-full max-w-2xl bg-slate-50 min-h-screen flex flex-col relative sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-800">
+
+    <!-- Header Administrador -->
+    <header class="bg-slate-900 text-white p-3 sm:rounded-t-3xl sticky top-0 z-30 shadow-md flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-xs">
+          <i data-lucide="store" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h1 id="merchant-display-name" class="font-black text-sm tracking-tight leading-none">Restaurante</h1>
+          <p id="merchant-display-branch" class="text-[10px] text-slate-400 truncate max-w-[200px]">Sucursal activa</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="index.html" title="Volver al Selector Principal" class="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-white bg-slate-800 px-2 py-1 rounded-lg transition border border-slate-700">
+          <i data-lucide="arrow-left" class="w-3 h-3"></i>
+          <span>Hub</span>
+        </a>
+        <a href="cliente.html" title="Abrir Vista Comensal / App" class="flex items-center gap-1 text-[10px] font-bold text-emerald-300 hover:text-white bg-emerald-950/80 border border-emerald-500/40 px-2 py-1 rounded-lg transition">
+          <i data-lucide="utensils" class="w-3 h-3 text-emerald-400"></i>
+          <span>App Cliente</span>
+        </a>
+        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-full">
+          Caja Activa
+        </span>
+        <button onclick="AdminApp.logout()" title="Cerrar Sesión" class="text-slate-400 hover:text-red-400 p-1">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Métricas Rápidas del Restaurante -->
+    <div class="bg-slate-900 border-b border-slate-800 p-3 grid grid-cols-3 gap-2 text-center text-xs">
+      <div class="bg-slate-800/80 p-2.5 rounded-xl">
+        <span class="text-[10px] text-slate-400 block font-medium">Recuperado</span>
+        <span id="admin-stat-money" class="font-black text-emerald-400 text-sm">$380.000</span>
+      </div>
+      <div class="bg-slate-800/80 p-2.5 rounded-xl">
+        <span class="text-[10px] text-slate-400 block font-medium">Platos Salvados</span>
+        <span id="admin-stat-portions" class="font-black text-white text-sm">22 platos</span>
+      </div>
+      <div class="bg-slate-800/80 p-2.5 rounded-xl">
+        <span class="text-[10px] text-slate-400 block font-medium">CO₂ Evitado</span>
+        <span id="admin-stat-co2" class="font-black text-teal-300 text-sm">40 kg</span>
+      </div>
+    </div>
+
+    <!-- Navegación de Pestañas Admin -->
+    <div class="p-3 bg-slate-950 flex gap-1 overflow-x-auto no-scrollbar text-xs">
+      <button data-tab="franchises" class="admin-tab-btn flex-1 bg-emerald-600 text-white font-bold py-2 px-2.5 rounded-xl transition whitespace-nowrap flex items-center justify-center gap-1 shadow-md">
+        <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
+        <span>Franquicias & Sedes</span>
+      </button>
+
+      <button data-tab="scanner" class="admin-tab-btn flex-1 bg-slate-800 text-slate-300 font-bold py-2 px-2.5 rounded-xl transition whitespace-nowrap flex items-center justify-center gap-1.5">
+        <i data-lucide="qr-code" class="w-4 h-4"></i>
+        <span>Escanear QR</span>
+      </button>
+
+      <button data-tab="publisher" class="admin-tab-btn flex-1 bg-slate-800 text-slate-300 font-bold py-2 px-2.5 rounded-xl transition whitespace-nowrap flex items-center justify-center gap-1">
+        <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+        <span>Publicar (10s)</span>
+      </button>
+
+      <button data-tab="calculator" class="admin-tab-btn flex-1 bg-slate-800 text-slate-300 font-bold py-2 px-2.5 rounded-xl transition whitespace-nowrap flex items-center justify-center gap-1">
+        <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+        <span>Calculadora ROI</span>
+      </button>
+
+      <button data-tab="crm" class="admin-tab-btn flex-1 bg-slate-800 text-slate-300 font-bold py-2 px-2.5 rounded-xl transition whitespace-nowrap flex items-center justify-center gap-1">
+        <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i>
+        <span>Mi Ruta (CRM)</span>
+      </button>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 1. PESTAÑA: ESCÁNER QR DE COMENSALES (CÁMARA / VISOR LÁSER)     -->
+    <!-- ============================================================== -->
+    <div id="sec-scanner" class="p-4 space-y-4 pb-28">
+      
+      <!-- Visor de Escáner Óptico -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-3xl p-5 text-white shadow-2xl space-y-4 border border-slate-800 relative overflow-hidden">
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <h3 class="font-black text-sm text-emerald-400 uppercase tracking-wider">Lector QR en Punto de Pago</h3>
+          </div>
+          <span class="text-[10px] font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">Listo</span>
+        </div>
+
+        <!-- Marco Visor con mira y línea láser -->
+        <div class="relative w-56 h-56 mx-auto bg-black/60 rounded-3xl border-2 border-emerald-500/50 flex items-center justify-center p-4 shadow-inner">
+          
+          <!-- Esquinas guía de encuadre -->
+          <div class="absolute top-2 left-2 w-6 h-6 border-t-4 border-l-4 border-emerald-400 rounded-tl-lg"></div>
+          <div class="absolute top-2 right-2 w-6 h-6 border-t-4 border-r-4 border-emerald-400 rounded-tr-lg"></div>
+          <div class="absolute bottom-2 left-2 w-6 h-6 border-b-4 border-l-4 border-emerald-400 rounded-bl-lg"></div>
+          <div class="absolute bottom-2 right-2 w-6 h-6 border-b-4 border-r-4 border-emerald-400 rounded-br-lg"></div>
+
+          <!-- Rayo láser animado -->
+          <div id="scanner-laser-beam" class="scanner-laser absolute left-4 right-4 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#10b981]"></div>
+
+          <!-- Video cámara (oculto hasta activar) -->
+          <video id="scanner-video-preview" class="hidden w-full h-full object-cover rounded-2xl"></video>
+
+          <!-- Ícono de espera de QR -->
+          <div id="scanner-placeholder-icon" class="text-center space-y-2 opacity-80">
+            <i data-lucide="qr-code" class="w-16 h-16 mx-auto text-emerald-400/80 animate-pulse"></i>
+            <p class="text-[11px] text-slate-400">Apunta la cámara al QR del cliente</p>
+          </div>
+        </div>
+
+        <!-- Botones de Acción del Escáner -->
+        <div class="space-y-2 pt-1">
+          <!-- Botón de Escaneo Directo de Demostración -->
+          <button 
+            onclick="AdminApp.simulateScanLatestVoucher()"
+            class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white font-black text-xs rounded-2xl shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
+            <i data-lucide="scan" class="w-5 h-5"></i>
+            <span>ESCANEAR QR DEL CLIENTE (1 CLIC)</span>
+          </button>
+
+          <!-- Botón Activar Cámara Real del Dispositivo -->
+          <button 
+            id="btn-toggle-camera"
+            onclick="AdminApp.toggleCamera()"
+            class="w-full py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold text-xs rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5">
+            <i data-lucide="camera" class="w-4 h-4 text-emerald-400"></i>
+            <span id="btn-camera-text">Activar Cámara del Celular / Tablet</span>
+          </button>
+        </div>
+
+        <!-- Respaldo manual colapsable (solo si falla la cámara) -->
+        <div class="pt-1 border-t border-slate-800 text-center">
+          <button 
+            onclick="document.getElementById('manual-pin-box').classList.toggle('hidden')" 
+            class="text-[11px] text-slate-400 hover:text-emerald-400 font-bold transition">
+            ¿Problemas con la cámara? Ingresar PIN de 4 dígitos manualmente ▾
+          </button>
+
+          <div id="manual-pin-box" class="hidden mt-3 p-3 bg-slate-800/80 rounded-2xl border border-slate-700 space-y-2">
+            <form id="form-validate-pin" class="flex gap-2">
+              <input 
+                id="input-pin-to-validate" 
+                type="text" 
+                inputmode="numeric" 
+                maxlength="6" 
+                placeholder="PIN" 
+                class="w-2/3 bg-slate-900 border border-slate-700 text-white font-mono text-center text-lg font-black tracking-widest rounded-xl py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              
+              <button 
+                type="submit" 
+                class="w-1/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition">
+                Validar
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Historial de Cupones Validados Hoy -->
+      <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+        <h4 class="font-black text-slate-800 text-xs flex items-center justify-between">
+          <span>Últimos Cupones Escaneados Hoy</span>
+          <span class="text-emerald-600 text-[10px] font-bold">En Vivo</span>
+        </h4>
+        <div id="merchant-redeemed-history" class="space-y-2"></div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 2. PESTAÑA: PUBLICAR OFERTA EN 10 SEGUNDOS                     -->
+    <!-- ============================================================== -->
+    <div id="sec-publisher" class="hidden p-4 space-y-4 pb-28">
+      <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">Excedentes del día</span>
+            <h4 class="font-bold text-slate-800 text-sm mt-0.5">Publicar Oferta de Rescate (10s)</h4>
+          </div>
+          <span id="offer-pct-preview" class="text-xs font-black text-red-500 bg-red-50 px-2 py-1 rounded-lg">
+            -0% OFF
+          </span>
+        </div>
+
+        <form id="form-create-flash-offer" class="space-y-3 text-xs">
+          <div>
+            <label class="font-bold text-slate-600 block mb-1">Nombre del plato o paquete:</label>
+            <input name="title" type="text" required placeholder="Ej. Combo Corralísima + Papas Rústicas" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Precio carta ($ COP):</label>
+              <input id="offer-orig-price" name="originalPrice" type="number" required placeholder="Ej. 34900" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Precio rescate ($ COP):</label>
+              <input id="offer-disc-price" name="discountedPrice" type="number" required placeholder="Ej. 16900" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Porciones sobrantes:</label>
+              <input name="stock" type="number" value="3" min="1" max="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Ventana de recogida:</label>
+              <input name="pickupWindow" type="text" value="Hoy 8:45 PM - 9:45 PM" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Publicar Oferta Inmediatamente</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Ofertas Activas del Restaurante -->
+      <div class="space-y-2">
+        <h4 class="font-bold text-slate-800 text-xs">Tus Ofertas de Cierre Publicadas</h4>
+        <div id="merchant-active-offers-list" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 3. PESTAÑA: CALCULADORA COMERCIAL ROI (100% REACTIVA)           -->
+    <!-- ============================================================== -->
+    <div id="sec-calculator" class="hidden p-4 space-y-4 pb-28">
+      <div class="bg-slate-900 text-white p-4 rounded-3xl shadow-xl space-y-1">
+        <div class="flex items-center gap-2">
+          <i data-lucide="calculator" class="w-5 h-5 text-emerald-400"></i>
+          <h3 class="text-base font-black">Calculadora Financiera de Retorno (ROI)</h3>
+        </div>
+        <p class="text-xs text-slate-400">Demuestra en segundos a cualquier dueño de restaurante cuánto dinero pierde y cuánto recupera.</p>
+      </div>
+
+      <!-- Controles de la Calculadora -->
+      <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4 text-xs">
+        
+        <!-- Control 1: Platos que sobran al día -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <label class="font-bold text-slate-700 text-xs">¿Cuántos platos sobran al día en tu cocina?</label>
+            <span id="calc-portions-val" class="font-black text-emerald-800 bg-emerald-100 px-3 py-1 rounded-xl text-xs">8 platos/día</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="ROICalculator.stepPortions(-1)" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-base flex items-center justify-center transition active:scale-95">-</button>
+            <input 
+              id="calc-portions" 
+              type="range" 
+              min="1" 
+              max="40" 
+              value="8" 
+              oninput="ROICalculator.onPortionsChange(this.value)"
+              class="flex-1 accent-emerald-600 h-2 bg-slate-200 rounded-lg cursor-pointer">
+            <button onclick="ROICalculator.stepPortions(1)" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-base flex items-center justify-center transition active:scale-95">+</button>
+          </div>
+        </div>
+
+        <!-- Control 2: Precio promedio de carta -->
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <div class="flex justify-between items-center">
+            <label class="font-bold text-slate-700 text-xs">Precio promedio de plato en carta ($ COP):</label>
+            <span id="calc-price-val" class="font-black text-emerald-800 bg-emerald-100 px-3 py-1 rounded-xl text-xs">$ 28.000 COP</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="ROICalculator.stepPrice(-2000)" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-sm flex items-center justify-center transition active:scale-95">-$2k</button>
+            <input 
+              id="calc-price" 
+              type="range" 
+              min="10000" 
+              max="70000" 
+              step="1000" 
+              value="28000" 
+              oninput="ROICalculator.onPriceChange(this.value)"
+              class="flex-1 accent-emerald-600 h-2 bg-slate-200 rounded-lg cursor-pointer">
+            <button onclick="ROICalculator.stepPrice(2000)" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-sm flex items-center justify-center transition active:scale-95">+$2k</button>
+          </div>
+
+          <!-- Presets rápidos de precios comunes en Colombia -->
+          <div class="flex gap-1.5 pt-1 overflow-x-auto no-scrollbar">
+            <button onclick="ROICalculator.setPricePreset(18000)" class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-bold rounded-lg text-[10px]">
+              $18.000 (Rápida/Pan)
+            </button>
+            <button onclick="ROICalculator.setPricePreset(28000)" class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-bold rounded-lg text-[10px]">
+              $28.000 (Corral/Crepes)
+            </button>
+            <button onclick="ROICalculator.setPricePreset(38000)" class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-bold rounded-lg text-[10px]">
+              $38.000 (Wok/Gourmet)
+            </button>
+            <button onclick="ROICalculator.setPricePreset(50000)" class="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-bold rounded-lg text-[10px]">
+              $50.000 (Combos)
+            </button>
+          </div>
+        </div>
+
+        <!-- Control 3: Días de operación -->
+        <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+          <span class="font-bold text-slate-700">Días de atención al mes:</span>
+          <select 
+            id="calc-days" 
+            onchange="ROICalculator.onDaysChange(this.value)"
+            class="bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-xl p-2 text-xs">
+            <option value="26">26 días (Lunes a Sábado)</option>
+            <option value="30">30 días (Todos los días)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tarjetas de Resultados Financieros en Vivo -->
+      <div class="space-y-3">
+        <!-- Pérdida Actual -->
+        <div class="bg-red-50 border border-red-200 rounded-3xl p-4 text-center space-y-1">
+          <span class="text-red-700 font-black text-xs uppercase tracking-wider block">Dinero que el Restaurante Bota a la Basura al Año:</span>
+          <div id="calc-annual-loss" class="text-2xl sm:text-3xl font-black text-red-600">-$ 24.460.800 COP</div>
+          <p class="text-[11px] text-red-500">Costo neto de ingredientes y preparación que nunca se vendieron.</p>
+        </div>
+
+        <!-- Ganancia Neta Recuperada -->
+        <div class="bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-950 text-white rounded-3xl p-5 text-center space-y-2 shadow-xl">
+          <span class="text-emerald-200 font-black text-xs uppercase tracking-wider block">Dinero Neto Recuperado en el Bolsillo del Dueño:</span>
+          <div id="calc-annual-net" class="text-3xl sm:text-4xl font-black text-white">+$ 31.332.000 COP / año</div>
+          <div id="calc-monthly-net" class="text-sm font-bold text-emerald-200">+$ 2.611.000 COP / mes</div>
+
+          <div class="pt-3 border-t border-white/20 grid grid-cols-2 gap-2 text-center text-xs">
+            <div class="bg-white/10 p-2 rounded-xl">
+              <span class="text-[10px] text-emerald-200 block">Nuevos Clientes</span>
+              <span id="calc-new-clients" class="font-bold text-white text-xs">+1.872 nuevos/año</span>
+            </div>
+            <div class="bg-white/10 p-2 rounded-xl">
+              <span class="text-[10px] text-emerald-200 block">Impacto Ambiental</span>
+              <span id="calc-co2-saved" class="font-bold text-white text-xs">4.492 kg CO₂</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 4. PESTAÑA: BITÁCORA COMERCIAL Y CRM                           -->
+    <!-- ============================================================== -->
+    <div id="sec-crm" class="hidden p-4 space-y-4 pb-28">
+      <div class="bg-slate-900 text-white p-4 rounded-2xl shadow-xl space-y-1">
+        <h3 class="text-base font-black">Mi Ruta de Restaurantes</h3>
+        <p class="text-xs text-slate-400">Control de visitas, gerentes contactados y locales que aceptaron el piloto.</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 text-center text-xs">
+        <div class="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm">
+          <span class="text-[10px] text-slate-400 block font-medium">Total</span>
+          <span id="crm-stat-total" class="font-black text-slate-800 text-base">10</span>
+        </div>
+        <div class="bg-white p-2.5 rounded-xl border border-emerald-100 shadow-sm">
+          <span class="text-[10px] text-emerald-600 block font-bold">Aceptaron</span>
+          <span id="crm-stat-accepted" class="font-black text-emerald-600 text-base">5</span>
+        </div>
+        <div class="bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
+          <span class="text-[10px] text-amber-600 block font-bold">Pendientes</span>
+          <span id="crm-stat-pending" class="font-black text-amber-600 text-base">2</span>
+        </div>
+      </div>
+
+      <div id="admin-crm-list" class="space-y-3"></div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- 5. PESTAÑA: GESTIÓN DE FRANQUICIAS Y SEDES ALIADAS             -->
+    <!-- ============================================================== -->
+    <div id="sec-franchises" class="p-4 space-y-4 pb-28">
+      
+      <!-- Banner de Resumen y Acciones Rápidas -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white p-5 rounded-3xl shadow-xl space-y-3 border border-slate-800">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <span class="text-[10px] font-black tracking-widest text-emerald-400 uppercase">Control de Red Gastronómica</span>
+            <h3 class="text-base font-black text-white">Franquicias & Sedes Aliadas</h3>
+          </div>
+          <button 
+            onclick="AdminApp.openAddFranchiseModal()"
+            class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5 active:scale-95 shrink-0">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>+ Nueva Franquicia</span>
+          </button>
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Agrega marcas con sus sedes en Bogotá. Puedes <strong>activar o pausar franquicias completas</strong>, gestionar sedes individuales o <strong>eliminar de 1 clic</strong> las marcas que no participen.
+        </p>
+
+        <!-- Contadores de Estado -->
+        <div class="grid grid-cols-3 gap-2 pt-1 text-center text-xs">
+          <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
+            <span class="text-[10px] text-slate-400 block font-medium">Franquicias</span>
+            <span id="fran-stat-total" class="font-black text-white text-sm">12 marcas</span>
+          </div>
+          <div class="bg-slate-800/80 p-2.5 rounded-xl border border-emerald-900/50">
+            <span class="text-[10px] text-emerald-400 block font-medium">Sedes Activas</span>
+            <span id="fran-stat-active-sedes" class="font-black text-emerald-400 text-sm">38 sedes</span>
+          </div>
+          <div class="bg-slate-800/80 p-2.5 rounded-xl border border-amber-900/50">
+            <span class="text-[10px] text-amber-400 block font-medium">Pausadas</span>
+            <span id="fran-stat-paused-sedes" class="font-black text-amber-400 text-sm">0 sedes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de Búsqueda y Restauración -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input 
+            id="franchise-search-input" 
+            type="text" 
+            placeholder="Buscar franquicia o sede..." 
+            oninput="AdminApp.filterFranchises(this.value)"
+            class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-sm">
+        </div>
+        <button 
+          onclick="AdminApp.resetToDefaultDemoData()"
+          title="Restaurar las 12 franquicias predeterminadas"
+          class="px-2.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 shadow-sm">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Restaurar Catálogo</span>
+        </button>
+      </div>
+
+      <!-- Lista Dinámica de Franquicias y Sedes -->
+      <div id="admin-franchises-list" class="space-y-3">
+        <!-- Renderizado dinámicamente desde admin.js -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: AGREGAR NUEVA FRANQUICIA (CON SEDE INICIAL Y MENÚ)      -->
+  <!-- ============================================================== -->
+  <div id="modal-add-franchise" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-4 my-8 modal-animate-in">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-lg">
+            🏢
+          </div>
+          <div>
+            <h3 class="font-black text-slate-900 text-sm">Registrar Nueva Franquicia</h3>
+            <p class="text-[10px] text-slate-400">Añade la marca, su logo corporativo y su primera sede</p>
+          </div>
+        </div>
+        <button onclick="AdminApp.closeAddFranchiseModal()" class="text-slate-400 hover:text-slate-700 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-new-franchise" class="space-y-3.5 text-xs">
+        
+        <!-- Bloque 1: Datos de la Marca -->
+        <div class="space-y-2">
+          <span class="font-black text-slate-800 text-[11px] block uppercase tracking-wider">1. Datos de la Marca</span>
+          
+          <div class="grid grid-cols-3 gap-2">
+            <div class="col-span-2">
+              <label class="font-bold text-slate-600 block mb-1">Nombre de la Franquicia / Restaurante:</label>
+              <input name="name" type="text" required placeholder="Ej. Pizzería Don Mario" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Logo (Emoji):</label>
+              <input name="brandLogo" type="text" required value="🍕" placeholder="🍕" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center text-sm font-bold focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Categoría Gastronómica:</label>
+              <select name="category" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500">
+                <option value="Gourmet">🥞 Gourmet / Platos</option>
+                <option value="Hamburguesas">🍔 Hamburguesas</option>
+                <option value="Italiana" selected>🍕 Italiana / Pizza</option>
+                <option value="Panadería">🥐 Panadería & Café</option>
+                <option value="Asiática">🥢 Asiática & Sushi</option>
+                <option value="Pollo">🍗 Pollo Apanado</option>
+                <option value="Sandwich">🥪 Sándwich</option>
+                <option value="Saludable">🥗 Saludable / Bowls</option>
+                <option value="Cafetería">☕ Cafetería</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Horario General:</label>
+              <input name="openingHours" type="text" value="11:30 AM - 10:00 PM" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="font-bold text-slate-600 block mb-1">Foto de Portada (URL Unsplash o Web):</label>
+            <input name="coverImage" type="url" value="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-[11px] font-mono focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <!-- Bloque 2: Primera Sede Inicial -->
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <span class="font-black text-slate-800 text-[11px] block uppercase tracking-wider">2. Primera Sede / Local Físico</span>
+          
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Nombre de la Sede:</label>
+              <input name="branchName" type="text" required placeholder="Ej. Sede Zona G" value="Sede Principal" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Zona en Bogotá:</label>
+              <select name="zone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500">
+                <option value="Zona G / Chapinero">Zona G / Chapinero</option>
+                <option value="Parque 93 / Chicó">Parque 93 / Chicó</option>
+                <option value="Zona Rosa / Andino">Zona Rosa / Andino</option>
+                <option value="Usaquén">Usaquén</option>
+                <option value="Pepe Sierra / Usaquén">Pepe Sierra</option>
+                <option value="Salitre / Aeropuerto">Ciudad Salitre</option>
+                <option value="Galerías / Teusaquillo">Galerías</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="font-bold text-slate-600 block mb-1">Dirección Exacta:</label>
+            <input name="address" type="text" required placeholder="Ej. Calle 69 # 5-12, Bogotá" value="Cra. 13 # 85-32, Bogotá" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Nombre del Administrador:</label>
+              <input name="contactName" type="text" placeholder="Ej. Mario Rossi" value="Administrador General" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Teléfono / WhatsApp:</label>
+              <input name="contactPhone" type="tel" placeholder="+57 312 000 0000" value="+57 310 000 0000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque 3: Plato de Rescate Inicial -->
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <span class="font-black text-slate-800 text-[11px] block uppercase tracking-wider">3. Primer Plato de Rescate (50% OFF)</span>
+          
+          <div>
+            <label class="font-bold text-slate-600 block mb-1">Nombre del Plato o Combo:</label>
+            <input name="dishTitle" type="text" required placeholder="Ej. Pizza Mediana 4 Quesos Horneada en Leña" value="Plato Rescate Especial de la Casa" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Precio Normal ($ COP):</label>
+              <input name="dishOriginalPrice" type="number" required placeholder="Ej. 36000" value="34000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Precio Rescate ($ COP):</label>
+              <input name="dishDiscountedPrice" type="number" required placeholder="Ej. 17000" value="16900" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-700">
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 flex gap-2">
+          <button type="button" onclick="AdminApp.closeAddFranchiseModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition">
+            Cancelar
+          </button>
+          <button type="submit" class="w-2/3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-1">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Guardar y Activar Franquicia</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL: AGREGAR NUEVA SEDE A UNA FRANQUICIA EXISTENTE          -->
+  <!-- ============================================================== -->
+  <div id="modal-add-sede" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 modal-animate-in">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-black text-lg">
+            📍
+          </div>
+          <div>
+            <h3 class="font-black text-slate-900 text-sm">Añadir Sede a Franquicia</h3>
+            <p id="modal-add-sede-brand-subtitle" class="text-[10px] text-slate-400">Crepes & Waffles</p>
+          </div>
+        </div>
+        <button onclick="AdminApp.closeAddSedeModal()" class="text-slate-400 hover:text-slate-700 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-new-sede" class="space-y-3 text-xs">
+        <input type="hidden" id="input-sede-franchise-id" name="franchiseId">
+
+        <div>
+          <label class="font-bold text-slate-600 block mb-1">Nombre de la Sede / Sucursal:</label>
+          <input name="branchName" type="text" required placeholder="Ej. Sede Calle 85" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-600 block mb-1">Zona Gastronómica en Bogotá:</label>
+          <select name="zone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500">
+            <option value="Zona G / Chapinero">Zona G / Chapinero</option>
+            <option value="Parque 93 / Chicó">Parque 93 / Chicó</option>
+            <option value="Zona Rosa / Andino">Zona Rosa / Andino</option>
+            <option value="Usaquén">Usaquén</option>
+            <option value="Pepe Sierra / Usaquén">Pepe Sierra</option>
+            <option value="Salitre / Aeropuerto">Ciudad Salitre</option>
+            <option value="Galerías / Teusaquillo">Galerías</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-600 block mb-1">Dirección Exacta:</label>
+          <input name="address" type="text" required placeholder="Ej. Cra. 15 # 84-22, Bogotá" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-bold text-slate-600 block mb-1">Administrador de Sede:</label>
+            <input name="contactName" type="text" placeholder="Ej. Diego Rueda" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="font-bold text-slate-600 block mb-1">Teléfono / WhatsApp:</label>
+            <input name="contactPhone" type="tel" placeholder="+57 315 000 0000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div class="pt-3 flex gap-2">
+          <button type="button" onclick="AdminApp.closeAddSedeModal()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition">
+            Cancelar
+          </button>
+          <button type="submit" class="w-2/3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-1">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Agregar Sede</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Validación Éxito de Escaneo -->
+  <div id="admin-validation-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div id="admin-validation-content" class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl modal-animate-in"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/shared-data.js?v=2"></script>
+  <script src="js/qr-engine.js?v=2"></script>
+  <script src="js/calculator.js?v=2"></script>
+  <script src="js/admin.js?v=2"></script>
+  <script>
+    window.addEventListener('load', () => {
+      if (window.lucide) lucide.createIcons();
+      if (window.ROICalculator) ROICalculator.init();
+    });
+  </script>
+</body>
+</html>

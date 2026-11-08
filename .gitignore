@@ -1,0 +1,12 @@
+# OS generated
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary files & tests
+temp*
+*.tmp
+*.log
+scratch/
+test_*

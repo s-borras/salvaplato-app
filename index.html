@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-slate-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SalvaPlato Colombia - Plataforma Gastronómica & Anti-Desperdicio</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 p-4">
+
+  <main class="w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 modal-animate-in">
+    
+    <!-- Header de la Marca -->
+    <div class="text-center space-y-2">
+      <div class="w-16 h-16 bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 text-white rounded-3xl flex items-center justify-center text-3xl mx-auto shadow-xl shadow-emerald-500/30">
+        🌱
+      </div>
+      <h1 class="text-2xl font-black text-slate-900 tracking-tight">SalvaPlato Colombia</h1>
+      <p class="text-xs text-slate-500 max-w-xs mx-auto">
+        La plataforma que conecta comensales con el 20% de descuento en carta y rescates nocturnos hasta del 70% OFF en Bogotá.
+      </p>
+    </div>
+
+    <!-- Selección de Portal / Aplicación -->
+    <div class="space-y-3 pt-2">
+      <span class="text-[11px] uppercase tracking-wider font-bold text-slate-400 block text-center">
+        Selecciona tu perfil de acceso:
+      </span>
+
+      <!-- Tarjeta 1: Aplicación Comensal -->
+      <a href="cliente.html" class="block bg-slate-50 hover:bg-emerald-50 border-2 border-slate-100 hover:border-emerald-500 p-4 rounded-2xl transition duration-200 group shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 group-hover:scale-105 transition shadow-md shadow-emerald-600/20">
+            <i data-lucide="utensils" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black text-slate-900 text-sm group-hover:text-emerald-800">Soy Comensal / Cliente</h3>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition"></i>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">
+              ⭐ 20% OFF permanente en carta & paquetes de rescate nocturno al 60%.
+            </p>
+          </div>
+        </div>
+      </a>
+
+      <!-- Tarjeta 2: Portal Administrador / Restaurante -->
+      <a href="admin.html" class="block bg-slate-50 hover:bg-amber-50 border-2 border-slate-100 hover:border-amber-500 p-4 rounded-2xl transition duration-200 group shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg shrink-0 group-hover:scale-105 transition shadow-md shadow-amber-500/20">
+            <i data-lucide="store" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <h3 class="font-black text-slate-900 text-sm group-hover:text-amber-800">Soy Restaurante / Admin</h3>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition"></i>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">
+              Validador de meseros en caja, publicación en 10s, CRM de visitas y calculadora ROI.
+            </p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Beneficios del ecosistema -->
+    <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-100 text-xs text-slate-600 space-y-1.5">
+      <div class="flex items-center gap-2">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+        <span>Sincronización en tiempo real entre cliente y restaurante.</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+        <span>Marcas reales de Rappi Colombia (Crepes, El Corral, Frisby...).</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+        <span>Precios en pesos colombianos y código QR verificable.</span>
+      </div>
+    </div>
+
+    <div class="text-center text-[10px] text-slate-400">
+      SalvaPlato Colombia • Demo Comercial para Restaurantes
+    </div>
+
+  </main>
+
+  <script>
+    window.addEventListener('load', () => {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

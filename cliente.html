@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-slate-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SalvaPlato - Portal Comensal (Combos 20% & Rescates hasta 70% OFF)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Leaflet Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-start min-h-screen bg-slate-950 p-0 sm:p-4">
+
+  <!-- ============================================================== -->
+  <!-- 1. PANTALLA INICIAL: INICIAR SESIÓN / REGISTRARSE              -->
+  <!-- ============================================================== -->
+  <div id="client-auth-screen" class="w-full max-w-md min-h-screen flex flex-col justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 shadow-2xl space-y-5 modal-animate-in">
+      
+      <!-- Logo y bienvenida -->
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 bg-gradient-to-tr from-emerald-600 to-teal-400 text-white rounded-2xl flex items-center justify-center font-black text-2xl mx-auto shadow-lg shadow-emerald-600/30">
+          🌱
+        </div>
+        <h2 class="text-xl font-black text-slate-900 mt-2">SalvaPlato Colombia</h2>
+        <p class="text-xs text-slate-500">20% en combos grandes, 15% en platos y hasta 70% en rescates</p>
+      </div>
+
+      <!-- Tabs de Ingreso / Registro -->
+      <div class="flex border-b border-slate-100 bg-slate-50 rounded-xl p-1 text-xs font-bold">
+        <button id="btn-tab-login" class="flex-1 py-2 rounded-lg border-b-2 border-emerald-600 text-emerald-700 text-center transition">
+          Iniciar Sesión
+        </button>
+        <button id="btn-tab-register" class="flex-1 py-2 rounded-lg border-b-2 border-transparent text-slate-400 text-center transition">
+          Crear Cuenta
+        </button>
+      </div>
+
+      <!-- Formulario Login -->
+      <div id="box-login-form">
+        <form id="form-login" class="space-y-3.5 text-xs">
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Correo Electrónico:</label>
+            <input id="input-login-email" type="email" required value="juan.perez@ejemplo.com" placeholder="tu@correo.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-emerald-500">
+          </div>
+
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Contraseña:</label>
+            <input id="input-login-pass" type="password" required value="123456" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-emerald-500">
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-1">
+            <span>Ingresar a SalvaPlato</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Botón Demo en 1 Clic -->
+          <button type="button" onclick="ClienteApp.loginDemo()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition flex items-center justify-center gap-1.5 text-xs">
+            <span>⚡ Entrar como Comensal Demo (1 Clic)</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Formulario Registro -->
+      <div id="box-register-form" class="hidden">
+        <form id="form-register" class="space-y-3 text-xs">
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Nombre Completo:</label>
+            <input id="input-reg-name" type="text" required placeholder="Ej. Camila Morales" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+          </div>
+
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Celular / WhatsApp:</label>
+            <input id="input-reg-phone" type="tel" required placeholder="+57 312 000 0000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Correo:</label>
+              <input id="input-reg-email" type="email" required placeholder="correo@ejemplo.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">Ciudad:</label>
+              <select id="input-reg-city" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500 font-bold">
+                <option value="Bogotá D.C.">Bogotá D.C.</option>
+                <option value="Medellín">Medellín</option>
+                <option value="Cali">Cali</option>
+                <option value="Barranquilla">Barranquilla</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bg-emerald-50 text-emerald-900 p-2.5 rounded-xl text-[11px] font-medium flex items-center gap-1.5">
+            <span>🎁 ¡Recibes <strong>$20.000 COP</strong> en SalvaCoins para tu primer pedido!</span>
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/25 transition">
+            Crear Mi Cuenta y Empezar
+          </button>
+        </form>
+      </div>
+
+      <div class="pt-2 text-center border-t border-slate-100">
+        <a href="admin.html" class="text-xs text-slate-500 hover:text-emerald-600 font-bold">
+          ¿Eres dueño de un restaurante? Ingresa aquí al Portal Administrador
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. APLICACIÓN PRINCIPAL DE COMENSAL                            -->
+  <!-- ============================================================== -->
+  <div id="client-main-app" class="hidden w-full max-w-2xl bg-slate-50 min-h-screen flex flex-col relative sm:rounded-3xl sm:shadow-2xl sm:border sm:border-slate-800">
+
+    <!-- ========================================================= -->
+    <!-- HEADER CORREGIDO: NOMBRE Y SALVACOINS PERFECTAMENTE SEPARADOS -->
+    <!-- ========================================================= -->
+    <header class="bg-slate-900 text-white px-3.5 py-2.5 sm:rounded-t-3xl sticky top-0 z-30 shadow-md flex items-center justify-between gap-2">
+      
+      <!-- Brand Left -->
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white flex items-center justify-center font-black text-sm shadow-sm">
+          🌱
+        </div>
+        <div class="leading-tight">
+          <h1 class="font-black text-sm tracking-tight text-white">SalvaPlato</h1>
+          <p class="text-[9px] text-slate-400 font-medium">Bogotá • Rappi</p>
+        </div>
+      </div>
+
+      <!-- User & SalvaCoins Right (Completamente separados, nunca se chocan) -->
+      <div class="flex items-center gap-2 overflow-hidden">
+        
+        <!-- Píldora del Usuario -->
+        <button onclick="ClienteApp.openProfileModal()" class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-750 py-1 px-2.5 rounded-full border border-slate-700 transition shrink-0">
+          <div class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-[9px] shrink-0">
+            <span id="user-avatar-initial">J</span>
+          </div>
+          <span id="user-display-name" class="font-bold text-xs text-slate-200 truncate max-w-[70px]">Juan</span>
+        </button>
+
+        <!-- Píldora de SalvaCoins -->
+        <div class="flex items-center gap-1 bg-emerald-950/80 border border-emerald-500/40 py-1 px-2.5 rounded-full text-[11px] font-black text-emerald-400 shrink-0">
+          <span class="text-xs">🪙</span>
+          <span id="user-wallet-badge">$24.500</span>
+        </div>
+
+        <!-- Botón Salir / Hub -->
+        <a href="index.html" title="Volver al Selector Principal" class="text-slate-400 hover:text-white bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0 transition flex items-center gap-1">
+          <i data-lucide="arrow-left" class="w-3 h-3"></i>
+          <span>Hub</span>
+        </a>
+
+        <!-- Botón Conexión con Portal Admin -->
+        <a href="admin.html" title="Ir al Portal de Restaurantes y Control" class="flex items-center gap-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0 transition">
+          <i data-lucide="store" class="w-3 h-3 text-amber-400"></i>
+          <span class="hidden sm:inline">Admin</span>
+        </a>
+
+        <!-- Botón Logout -->
+        <button onclick="ClienteApp.logout()" title="Cerrar Sesión" class="text-slate-400 hover:text-red-400 p-1 shrink-0 transition">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- BARRA SELECTOR DE DIRECCIÓN ACTIVA (ESTILO RAPPI) -->
+    <div class="bg-white border-b border-slate-100 px-4 py-2 flex items-center justify-between sticky top-[52px] z-20 shadow-sm">
+      <button onclick="ClienteApp.openAddressModal()" class="flex items-center gap-2 text-left hover:opacity-80 transition group max-w-[82%]">
+        <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>
+        </div>
+        <div class="truncate">
+          <div class="flex items-center gap-1">
+            <span id="current-address-label" class="font-black text-slate-900 text-xs truncate">Casa: Cra. 13 # 85-32</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0"></i>
+          </div>
+          <p id="current-address-sub" class="text-[10px] text-slate-400 truncate">Zona Rosa / Chapinero • Bogotá</p>
+        </div>
+      </button>
+
+      <button onclick="ClienteApp.openAddressModal()" class="text-[10px] font-black text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition shrink-0">
+        Cambiar
+      </button>
+    </div>
+
+    <!-- Barra de Simulación Horaria -->
+    <div class="bg-slate-900/95 border-b border-slate-800 px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-1.5 text-slate-300">
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span id="simulated-clock-text" class="font-bold text-[11px]">⏰ Horario Simulado</span>
+      </div>
+
+      <div class="flex items-center gap-1">
+        <button data-shift="all" class="shift-pill bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md transition">
+          ⏰ Todas
+        </button>
+        <button data-shift="lunch" class="shift-pill bg-slate-800 text-slate-300 hover:text-white text-[10px] font-bold px-2 py-0.5 rounded-md transition">
+          ☀️ Almuerzo
+        </button>
+        <button data-shift="afternoon" class="shift-pill bg-slate-800 text-slate-300 hover:text-white text-[10px] font-bold px-2 py-0.5 rounded-md transition">
+          ☕ Onces
+        </button>
+        <button data-shift="night" class="shift-pill bg-slate-800 text-slate-300 hover:text-white text-[10px] font-bold px-2 py-0.5 rounded-md transition">
+          🌙 Cierre Noche
+        </button>
+      </div>
+    </div>
+
+    <!-- Pestaña: Explorar Restaurantes (Feed) -->
+    <div id="client-feed-section" class="flex-1 p-4 space-y-4 pb-32">
+      
+      <!-- Buscador -->
+      <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input id="client-search-input" type="text" placeholder="Buscar Crepes, Corral, Wok, pizza, sushi, burgers..." oninput="ClienteApp.handleSearch(this.value)" class="w-full bg-slate-100 text-slate-800 text-xs rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+          <label class="flex items-center gap-1.5 text-slate-600 cursor-pointer font-bold">
+            <input type="checkbox" id="filter-only-accepted" class="accent-emerald-600 rounded">
+            <span>Ver solo con piloto confirmado (✅)</span>
+          </label>
+          <span class="text-amber-800 font-bold bg-amber-50 px-2 py-0.5 rounded">🔥 20% en combos</span>
+        </div>
+      </div>
+
+      <!-- Banner Descuentos Escalonados -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-emerald-950 rounded-3xl p-4 text-white shadow-xl space-y-2 border border-slate-800">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="bg-amber-500 text-slate-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full">
+            🔥 20% Combos Grandes
+          </span>
+          <span class="bg-emerald-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+            ⭐ 15% Platos Fuertes
+          </span>
+          <span class="bg-teal-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+            🥤 10% Bebidas
+          </span>
+          <span class="bg-red-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+            🌙 Cierres 60%
+          </span>
+        </div>
+        <h3 class="text-sm font-black leading-tight">Descuentos Justos y Comida Sin Desperdicio</h3>
+        <p class="text-xs text-slate-300 leading-snug">Disfruta descuentos especiales en mesa o salva paquetes sorpresa de cierre nocturno hasta con 70% de descuento en Bogotá.</p>
+      </div>
+
+      <!-- Categorías Pills -->
+      <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+        <button data-category="all" class="cat-pill bg-emerald-600 text-white shadow-md px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition">
+          🔥 Todas
+        </button>
+        <button data-category="Gourmet" class="cat-pill bg-white text-slate-600 border border-slate-200 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition">
+          🥞 Crepes & Gourmet
+        </button>
+        <button data-category="Hamburguesas" class="cat-pill bg-white text-slate-600 border border-slate-200 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition">
+          🍔 El Corral & Burgers
+        </button>
+        <button data-category="Pollo" class="cat-pill bg-white text-slate-600 border border-slate-200 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition">
+          🍗 Frisby
+        </button>
+        <button data-category="Panadería" class="cat-pill bg-white text-slate-600 border border-slate-200 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition">
+          🥐 Pan Pa' Ya! & Masa
+        </button>
+        <button data-category="Asiática" class="cat-pill bg-white text-slate-600 border border-slate-200 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition">
+          🥢 Wok & Sushi
+        </button>
+        <button data-category="Café" class="cat-pill bg-white text-slate-600 border border-slate-200 px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap transition">
+          ☕ Juan Valdez
+        </button>
+      </div>
+
+      <!-- Barra de Filtros Geográficos & Selector Lista / Mapa -->
+      <div class="flex items-center justify-between gap-2 bg-white p-2.5 rounded-2xl border border-slate-100 shadow-sm text-xs">
+        <!-- Radio de Distancia -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <span class="text-slate-400 font-bold text-[10px] shrink-0 flex items-center gap-0.5">
+            <i data-lucide="navigation" class="w-3 h-3 text-emerald-600"></i>
+            <span>Radio:</span>
+          </span>
+          <button onclick="ClienteApp.setDistanceFilter('all')" id="dist-filter-btn-all" class="dist-filter-btn px-2.5 py-1 rounded-lg font-bold text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-300">
+            Todos
+          </button>
+          <button onclick="ClienteApp.setDistanceFilter('1km')" id="dist-filter-btn-1km" class="dist-filter-btn px-2.5 py-1 rounded-lg font-bold text-[10px] bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100">
+            🚶 &lt; 1 km
+          </button>
+          <button onclick="ClienteApp.setDistanceFilter('3km')" id="dist-filter-btn-3km" class="dist-filter-btn px-2.5 py-1 rounded-lg font-bold text-[10px] bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100">
+            🚲 &lt; 3 km
+          </button>
+          <button onclick="ClienteApp.setDistanceFilter('5km')" id="dist-filter-btn-5km" class="dist-filter-btn px-2.5 py-1 rounded-lg font-bold text-[10px] bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100">
+            🚗 &lt; 5 km
+          </button>
+        </div>
+
+        <!-- Toggle Switch: Lista / Mapa -->
+        <div class="flex items-center p-0.5 bg-slate-100 rounded-xl shrink-0 font-bold text-[11px]">
+          <button onclick="ClienteApp.setViewMode('list')" id="btn-view-list" class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white text-emerald-700 shadow-sm transition">
+            <i data-lucide="list" class="w-3.5 h-3.5"></i>
+            <span>Lista</span>
+          </button>
+          <button onclick="ClienteApp.setViewMode('map')" id="btn-view-map" class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 transition">
+            <i data-lucide="map" class="w-3.5 h-3.5"></i>
+            <span>Mapa</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feed Dinámico (Vista Lista) -->
+      <div id="restaurant-offers-container" class="space-y-4"></div>
+
+      <!-- Contenedor Vista Mapa Interactivo -->
+      <div id="client-map-view" class="hidden space-y-3">
+        <div class="relative rounded-3xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-100">
+          <div id="leaflet-map-canvas" class="w-full h-[60vh] z-0"></div>
+
+          <!-- Botón flotante para centrar en mi ubicación GPS -->
+          <button onclick="ClienteApp.locateUserGPS()" class="absolute top-3 right-3 z-[1000] bg-white/95 backdrop-blur-md text-slate-700 hover:text-emerald-700 p-2.5 rounded-2xl shadow-lg border border-slate-200 font-bold text-xs flex items-center gap-1.5 transition">
+            <i data-lucide="crosshair" class="w-4 h-4 text-emerald-600"></i>
+            <span class="text-[11px]">Mi GPS</span>
+          </button>
+
+          <!-- Contador flotante de locales en mapa -->
+          <div class="absolute bottom-3 left-3 z-[1000] bg-slate-900/90 backdrop-blur-md text-white px-3 py-1.5 rounded-2xl shadow-lg text-[10px] font-bold flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="map-counter-text">Cargando mapa...</span>
+          </div>
+        </div>
+
+        <!-- Tarjeta emergente inferior al tocar un pin en el mapa -->
+        <div id="map-selected-store-card" class="hidden bg-white p-3.5 rounded-3xl border border-slate-100 shadow-xl transition space-y-2.5">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Mis Bonos & Pedidos -->
+    <div id="client-vouchers-section" class="hidden flex-1 p-4 space-y-3 pb-32">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-black text-slate-900 text-base">Mis Pedidos & Códigos QR</h3>
+          <p class="text-xs text-slate-500">Monitorea el estado y presenta tu código QR en caja</p>
+        </div>
+        <button onclick="ClienteApp.setTab('feed')" class="text-xs text-emerald-600 font-bold flex items-center gap-0.5">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>Volver</span>
+        </button>
+      </div>
+
+      <!-- Filtros de Estado de Pedido -->
+      <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl text-xs font-bold text-slate-600">
+        <button onclick="ClienteApp.setVoucherFilter('active')" id="vfilter-btn-active" class="flex-1 py-1.5 px-2 rounded-xl transition bg-white text-emerald-700 shadow-sm flex items-center justify-center gap-1">
+          <span>Activos</span>
+          <span id="badge-count-active" class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span>
+        </button>
+        <button onclick="ClienteApp.setVoucherFilter('redeemed')" id="vfilter-btn-redeemed" class="flex-1 py-1.5 px-2 rounded-xl transition hover:text-slate-900 flex items-center justify-center gap-1">
+          <span>Entregados</span>
+          <span id="badge-count-redeemed" class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span>
+        </button>
+        <button onclick="ClienteApp.setVoucherFilter('cancelled')" id="vfilter-btn-cancelled" class="flex-1 py-1.5 px-2 rounded-xl transition hover:text-slate-900 flex items-center justify-center gap-1">
+          <span>Cancelados</span>
+          <span id="badge-count-cancelled" class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span>
+        </button>
+      </div>
+
+      <div id="my-vouchers-list" class="space-y-3 pt-1"></div>
+    </div>
+
+    <!-- Barra de Navegación Inferior -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-6 py-2.5 flex items-center justify-around z-20 shadow-lg">
+      <button data-view="feed" class="client-nav-btn text-emerald-600 flex flex-col items-center text-[10px] font-bold">
+        <i data-lucide="compass" class="w-5 h-5"></i>
+        <span class="mt-0.5">Explorar</span>
+      </button>
+
+      <button data-view="vouchers" class="client-nav-btn text-slate-400 hover:text-emerald-600 flex flex-col items-center text-[10px] font-bold relative">
+        <i data-lucide="ticket" class="w-5 h-5"></i>
+        <span class="mt-0.5">Mis Bonos</span>
+      </button>
+
+      <a href="admin.html" class="text-slate-400 hover:text-emerald-600 flex flex-col items-center text-[10px] font-bold">
+        <i data-lucide="store" class="w-5 h-5"></i>
+        <span class="mt-0.5">Soy Local</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Barra Flotante Canasta con Botón Eliminar Canasta -->
+  <div id="floating-cart-bar" class="hidden fixed bottom-16 left-4 right-4 max-w-xl mx-auto z-40">
+    <div class="bg-slate-900 text-white p-3 sm:p-3.5 rounded-2xl shadow-2xl border border-slate-700 flex items-center justify-between gap-2.5">
+      
+      <!-- Botón para Eliminar / Vaciar la Canasta -->
+      <button onclick="ClienteApp.clearCart()" title="Eliminar y vaciar canasta" class="w-9 h-9 rounded-xl bg-red-500/20 hover:bg-red-500/40 text-red-400 hover:text-red-300 flex items-center justify-center transition shrink-0">
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+      </button>
+
+      <div class="flex items-center gap-2 truncate">
+        <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+        </div>
+        <div class="truncate leading-tight">
+          <span id="cart-items-count" class="font-black text-xs block text-white truncate">1 plato en canasta</span>
+          <span id="cart-saved-amount" class="text-[10px] text-emerald-400 font-bold">Ahorras $12.500 COP</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <span id="cart-total-price" class="text-sm font-black text-white">$16.500</span>
+        <button onclick="ClienteApp.openCheckoutModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1">
+          <span>Pagar</span>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: GESTIÓN DE TARJETAS                 -->
+  <!-- ========================================== -->
+  <div id="card-management-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl modal-animate-in max-h-[90vh] flex flex-col">
+      <div class="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <button onclick="ClienteApp.closeCardModal()" class="flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-xl transition shadow-sm">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Atrás</span>
+        </button>
+        <h3 class="font-black text-slate-800 text-xs sm:text-sm">Mis Tarjetas de Pago</h3>
+        <button onclick="ClienteApp.closeCardModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-4 overflow-y-auto text-xs">
+        <div class="space-y-2">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Tarjetas Registradas:</span>
+          <div id="user-cards-list" class="space-y-2"></div>
+        </div>
+
+        <button 
+          onclick="document.getElementById('new-card-form-box').classList.toggle('hidden')"
+          class="w-full py-2.5 rounded-2xl border-2 border-dashed border-slate-200 hover:border-emerald-500 text-emerald-700 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Agregar Nueva Tarjeta Débito / Crédito</span>
+        </button>
+
+        <!-- Formulario Nueva Tarjeta -->
+        <div id="new-card-form-box" class="hidden bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+          <h4 class="font-black text-slate-800 text-xs flex items-center gap-1.5">
+            <i data-lucide="credit-card" class="w-4 h-4 text-emerald-600"></i>
+            <span>Datos Completos de la Tarjeta</span>
+          </h4>
+          <form id="form-new-card" class="space-y-2.5">
+            <!-- Tipo de Tarjeta -->
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Tipo de Tarjeta:</label>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="bg-white p-2 rounded-xl border border-slate-200 cursor-pointer text-center font-bold text-xs flex items-center justify-center gap-1.5 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                  <input type="radio" name="cardType" value="Débito" checked class="accent-emerald-600">
+                  <span>💳 Débito</span>
+                </label>
+                <label class="bg-white p-2 rounded-xl border border-slate-200 cursor-pointer text-center font-bold text-xs flex items-center justify-center gap-1.5 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
+                  <input type="radio" name="cardType" value="Crédito" class="accent-emerald-600">
+                  <span>💳 Crédito</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Banco Emisor -->
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Banco Emisor (Colombia):</label>
+              <select name="cardBank" class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-500">
+                <option value="Bancolombia">Bancolombia</option>
+                <option value="Davivienda">Davivienda</option>
+                <option value="Nu Colombia">Nu Colombia</option>
+                <option value="Nequi">Nequi (Tarjeta Visa)</option>
+                <option value="Banco de Bogotá">Banco de Bogotá</option>
+                <option value="BBVA Colombia">BBVA Colombia</option>
+                <option value="Scotiabank Colpatria">Scotiabank Colpatria</option>
+                <option value="Banco Falabella">Banco Falabella</option>
+                <option value="Lulo Bank">Lulo Bank</option>
+                <option value="RappiCard">RappiCard</option>
+                <option value="Otro Banco">Otro Banco</option>
+              </select>
+            </div>
+
+            <!-- Número de Tarjeta -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="font-bold text-slate-600">Número de Tarjeta (16 dígitos):</label>
+                <span id="mgmt-card-brand-badge" class="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">AUTO</span>
+              </div>
+              <input name="cardNumber" type="text" maxlength="19" required placeholder="4589 1234 5678 9010"
+                oninput="ClienteApp.handleCardNumberInput(this, 'mgmt-card-brand-badge')"
+                class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-mono font-bold tracking-wider focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <!-- Titular -->
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Nombre Completo en la Tarjeta:</label>
+              <input name="cardHolder" type="text" required placeholder="Ej. JUAN CAMILO PEREZ" class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs uppercase font-semibold focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <!-- Vencimiento y CVV -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="font-bold text-slate-600 block mb-1">Vencimiento (MM/AA):</label>
+                <input name="cardExpiry" type="text" maxlength="5" required placeholder="09/28"
+                  oninput="ClienteApp.handleExpiryInput(this)"
+                  class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs text-center font-mono font-bold focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="font-bold text-slate-600 block mb-1">CVV / CVC:</label>
+                <input name="cardCVV" type="password" maxlength="4" required placeholder="•••" class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs text-center font-mono font-bold focus:ring-2 focus:ring-emerald-500">
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition">
+              Guardar Tarjeta
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SELECTOR DE DIRECCIÓN -->
+  <div id="address-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl modal-animate-in max-h-[90vh] flex flex-col">
+      <div class="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <button onclick="ClienteApp.closeAddressModal()" class="flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-xl transition shadow-sm">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Atrás</span>
+        </button>
+        <h3 class="font-black text-slate-800 text-xs sm:text-sm">Ubicación de Entrega / Recogida</h3>
+        <button onclick="ClienteApp.closeAddressModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-4 overflow-y-auto">
+        <div class="space-y-2">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Tus Direcciones Guardadas:</span>
+          <div id="saved-addresses-list" class="space-y-2"></div>
+        </div>
+
+        <button 
+          onclick="document.getElementById('new-address-form-box').classList.toggle('hidden')"
+          class="w-full py-2.5 rounded-2xl border-2 border-dashed border-slate-200 hover:border-emerald-500 text-emerald-700 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Agregar Nueva Dirección en Bogotá</span>
+        </button>
+
+        <div id="new-address-form-box" class="hidden bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 text-xs">
+          <h4 class="font-black text-slate-800 text-xs">Datos de la Nueva Ubicación</h4>
+          <form id="form-new-address" class="space-y-2.5">
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Nombre o Etiqueta:</label>
+              <div class="flex gap-2">
+                <label class="flex-1 bg-white p-2 rounded-xl border border-slate-200 text-center font-bold text-[11px] cursor-pointer">
+                  <input type="radio" name="tag" value="Casa" checked class="accent-emerald-600">
+                  <span>🏠 Casa</span>
+                </label>
+                <label class="flex-1 bg-white p-2 rounded-xl border border-slate-200 text-center font-bold text-[11px] cursor-pointer">
+                  <input type="radio" name="tag" value="Trabajo" class="accent-emerald-600">
+                  <span>💼 Trabajo</span>
+                </label>
+                <label class="flex-1 bg-white p-2 rounded-xl border border-slate-200 text-center font-bold text-[11px] cursor-pointer">
+                  <input type="radio" name="tag" value="Otro" class="accent-emerald-600">
+                  <span>📍 Otro</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">Dirección (Calle / Carrera & Número):</label>
+              <input name="line1" type="text" required placeholder="Ej. Calle 85 # 12-44" class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="font-bold text-slate-600 block mb-1">Zona / Barrio:</label>
+                <select name="zone" class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500">
+                  <option value="Zona Rosa / Chapinero">Chapinero / Zona Rosa</option>
+                  <option value="Chicó Norte / Parque 93">Parque 93 / Chicó</option>
+                  <option value="Usaquén Colonial">Usaquén</option>
+                  <option value="Zona G / Quinta Camacho">Zona G</option>
+                  <option value="Galerías / Teusaquillo">Galerías</option>
+                  <option value="Ciudad Salitre">Ciudad Salitre</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="font-bold text-slate-600 block mb-1">Apto / Torre / Notas:</label>
+                <input name="notes" type="text" placeholder="Ej. Apto 301, Torre 2" class="w-full bg-white border border-slate-200 rounded-xl p-2 text-xs focus:ring-2 focus:ring-emerald-500">
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition">
+              Guardar y Seleccionar Esta Dirección
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detalle Restaurante -->
+  <div id="restaurant-detail-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div id="restaurant-detail-content" class="bg-white w-full max-w-xl h-[92vh] sm:h-[85vh] rounded-t-3xl sm:rounded-3xl overflow-y-auto shadow-2xl modal-animate-in relative"></div>
+  </div>
+
+  <!-- Modal Checkout -->
+  <div id="order-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="order-modal-content" class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl modal-animate-in"></div>
+  </div>
+
+  <!-- Modal Ticket con Código QR Real -->
+  <div id="ticket-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="ticket-modal-content" class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl modal-animate-in"></div>
+  </div>
+
+  <!-- Modal Perfil -->
+  <div id="profile-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="profile-modal-content" class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl modal-animate-in"></div>
+  </div>
+
+  <!-- Modal Cancelar Pedido & Reembolso -->
+  <div id="cancel-order-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="cancel-order-content" class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl modal-animate-in"></div>
+  </div>
+
+  <!-- Modal Calificación y Reseña Post-Entrega -->
+  <div id="rating-order-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="rating-order-content" class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl modal-animate-in"></div>
+  </div>
+
+  <!-- Modal ¿Cómo llegar? (Google Maps & Waze) -->
+  <div id="directions-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="directions-modal-content" class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl modal-animate-in"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/shared-data.js?v=2"></script>
+  <script src="js/qr-engine.js?v=2"></script>
+  <script src="js/cliente.js?v=2"></script>
+  <script>
+    window.addEventListener('load', () => {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
